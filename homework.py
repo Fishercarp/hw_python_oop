@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Sequence, Union
 
 
 class InfoMessage:
@@ -55,9 +55,9 @@ class Training:
         """Вернуть информационное сообщение о выполненной тренировке."""
         return InfoMessage(self.__class__.__name__,
                            self.duration,
-                           self.distance,
-                           self.speed,
-                           self.calories)
+                           self.get_distance(),
+                           self.get_mean_speed(),
+                           self.get_spent_calories())
 
 
 class Running(Training):
@@ -132,19 +132,20 @@ class Swimming(Training):
                 * self.swm_tr_2 * self.weight)
 
 
-def read_package(self, workout_type: str, data: list) -> Training:
+def read_package(workout_type: str,
+                 data: Sequence[Union[int, float]]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    training_dict = {'SWM': Swimming,
-                     'RUN': Running,
-                     'WLK': SportsWalking}
-    return (training_dict[workout_type](*data))
+    packages: dict = {'SWM': Swimming,
+                      'RUN': Running,
+                      'WLK': SportsWalking}
+    return packages[workout_type](*data)
 
 
 def main(training: Union[Swimming, Running, SportsWalking]) -> None:
     """Главная функция."""
 
     info = training.show_training_info()
-    return info.get_message()
+    print(info.get_message())
 
 
 if __name__ == '__main__':
