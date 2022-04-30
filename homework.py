@@ -1,19 +1,15 @@
-from typing import Sequence, Union
+from dataclasses import dataclass
+from typing import Dict, Sequence, Union
 
 
+@dataclass
 class InfoMessage:
     """Информационное сообщение о тренировке."""
-    def __init__(self,
-                 training_type: str,
-                 duration: float,
-                 distance: float,
-                 speed: float,
-                 calories: float) -> None:
-        self.training_type = training_type
-        self.duration = duration
-        self.distance = distance
-        self.speed = speed
-        self.calories = calories
+    training_type: str
+    duration: float
+    distance: float
+    speed: float
+    calories: float
 
     def get_message(self):
         """Информация о тренировке."""
@@ -29,6 +25,8 @@ class Training:
     """Базовый класс тренировки."""
     LEN_STEP: float = 0.65
     M_IN_KM: int = 1000
+    MIN_IN_HOUR = 60
+    """"Переводит часы в минуты."""
 
     def __init__(self,
                  action: int,
@@ -49,7 +47,7 @@ class Training:
 
     def get_spent_calories(self) -> float:
         """Получаем количество затраченных калорий."""
-        pass
+        raise NotImplementedError
 
     def show_training_info(self) -> InfoMessage:
         """Вернуть информационное сообщение о выполненной тренировке."""
@@ -62,28 +60,22 @@ class Training:
 
 class Running(Training):
     """Тренировка: бег."""
-    calorie_1: float = 18
-    calorie_2: float = 20
-    min_in_hour = 60
-
-    def __init__(self, action: int,
-                 duration: float,
-                 weight: float) -> None:
-        super().__init__(action, duration, weight)
+    CALORIE_1: float = 18
+    CALORIE_2: float = 20
 
     def get_spent_calories(self) -> float:
         """Количество затраченных калорий: бег."""
-        return ((self.calorie_1 * self.get_mean_speed() - self.calorie_2)
-                * self.weight / self.M_IN_KM
-                * self.duration * self.min_in_hour)
+        minute: float = self.duration * self.MIN_IN_HOUR
+        """"Переводим часы в минуты."""
+        return ((self.CALORIE_1 * self.get_mean_speed() - self.CALORIE_2)
+                * self.weight / self.M_IN_KM * minute)
 
 
 class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
-    walk_1: float = 0.035
-    walk_2: float = 0.029
-    walk_3: float = 2
-    min_in_hour = 60
+    WALK_1: float = 0.035
+    WALK_2: float = 0.029
+    WALK_3: float = 2
 
     def __init__(self, action: int,
                  duration: float,
@@ -94,16 +86,17 @@ class SportsWalking(Training):
 
     def get_spent_calories(self) -> float:
         """Количество затраченных калорий: спортивная ходьба."""
-        return ((self.walk_1 * self.weight
-                + (self.get_mean_speed() ** self.walk_3
-                 // self.height) * self.walk_2 * self.weight)
-                * self.duration * self.min_in_hour)
+        minute = self.duration * self.MIN_IN_HOUR
+        """"Переводим часы в минуты"""
+        return ((self.WALK_1 * self.weight
+                + (self.get_mean_speed() ** self.WALK_3 // self.height)
+                * self.WALK_2 * self.weight) * minute)
 
 
 class Swimming(Training):
     """Тренировка: плавание."""
-    swm_tr_1: float = 1.1
-    swm_tr_2: float = 2
+    SWM_TR_1: float = 1.1
+    SWM_TR_2: float = 2
     LEN_STEP: float = 1.38
 
     def __init__(self,
@@ -128,20 +121,20 @@ class Swimming(Training):
 
     def get_spent_calories(self):
         """Количество затраченных калорий при плавании."""
-        return ((self.get_mean_speed() + self.swm_tr_1)
-                * self.swm_tr_2 * self.weight)
+        return ((self.get_mean_speed() + self.SWM_TR_1)
+                * self.SWM_TR_2 * self.weight)
 
 
 def read_package(workout_type: str,
                  data: Sequence[Union[int, float]]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    packages: dict = {'SWM': Swimming,
-                      'RUN': Running,
-                      'WLK': SportsWalking}
+    packages: Dict[str, object] = {'SWM': Swimming,
+                                   'RUN': Running,
+                                   'WLK': SportsWalking}
     return packages[workout_type](*data)
 
 
-def main(training: Union[Swimming, Running, SportsWalking]) -> None:
+def main(training: Training) -> None:
     """Главная функция."""
 
     info = training.show_training_info()
