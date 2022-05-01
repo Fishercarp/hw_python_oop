@@ -25,7 +25,7 @@ class Training:
     """Базовый класс тренировки."""
     LEN_STEP: float = 0.65
     M_IN_KM: int = 1000
-    MIN_IN_HOUR = 60
+    MIN_IN_HOUR: int = 60
     """"Переводит часы в минуты."""
 
     def __init__(self,
