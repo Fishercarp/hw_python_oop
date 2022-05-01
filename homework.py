@@ -43,7 +43,7 @@ class Training:
 
     def get_mean_speed(self) -> float:
         """Получаем среднюю скорость движения."""
-        return (self.get_distance() / self.duration)
+        return self.get_distance() / self.duration
 
     def get_spent_calories(self) -> float:
         """Получаем количество затраченных калорий."""
@@ -60,15 +60,14 @@ class Training:
 
 class Running(Training):
     """Тренировка: бег."""
-    CALORIE_1: float = 18
-    CALORIE_2: float = 20
+    CALORIE_1: int = 18
+    CALORIE_2: int = 20
 
     def get_spent_calories(self) -> float:
         """Количество затраченных калорий: бег."""
-        minute: float = self.duration * self.MIN_IN_HOUR
-        """"Переводим часы в минуты."""
+        duration_in_min: float = self.duration * self.MIN_IN_HOUR
         return ((self.CALORIE_1 * self.get_mean_speed() - self.CALORIE_2)
-                * self.weight / self.M_IN_KM * minute)
+                * self.weight / self.M_IN_KM * duration_in_min)
 
 
 class SportsWalking(Training):
@@ -128,9 +127,9 @@ class Swimming(Training):
 def read_package(workout_type: str,
                  data: Sequence[Union[int, float]]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    packages: Dict[str, object] = {'SWM': Swimming,
-                                   'RUN': Running,
-                                   'WLK': SportsWalking}
+    packages: Dict[str, Training] = {'SWM': Swimming,
+                                     'RUN': Running,
+                                     'WLK': SportsWalking}
     return packages[workout_type](*data)
 
 
