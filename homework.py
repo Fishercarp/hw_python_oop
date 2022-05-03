@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Dict, Sequence, Union
+from typing import Dict, Sequence, Type, Union
 
 
 @dataclass
@@ -74,7 +74,6 @@ class SportsWalking(Training):
     """Тренировка: спортивная ходьба."""
     WALK_1: float = 0.035
     WALK_2: float = 0.029
-    WALK_3: float = 2
 
     def __init__(self, action: int,
                  duration: float,
@@ -88,7 +87,7 @@ class SportsWalking(Training):
         minute = self.duration * self.MIN_IN_HOUR
         """"Переводим часы в минуты"""
         return ((self.WALK_1 * self.weight
-                + (self.get_mean_speed() ** self.WALK_3 // self.height)
+                + (self.get_mean_speed() ** 2 // self.height)
                 * self.WALK_2 * self.weight) * minute)
 
 
@@ -109,7 +108,7 @@ class Swimming(Training):
         self.length_pool = length_pool
         self.count_pool = count_pool
 
-    def get_mean_speed(self):
+    def get_mean_speed(self) -> float:
         """Получить среднюю скорость движения при плавании."""
         return (self.length_pool * self.count_pool
                 / self.M_IN_KM / self.duration)
@@ -127,9 +126,9 @@ class Swimming(Training):
 def read_package(workout_type: str,
                  data: Sequence[Union[int, float]]) -> Training:
     """Прочитать данные полученные от датчиков."""
-    packages: Dict[str, Training] = {'SWM': Swimming,
-                                     'RUN': Running,
-                                     'WLK': SportsWalking}
+    packages: Dict[str, Type[Training]] = {'SWM': Swimming,
+                                           'RUN': Running,
+                                           'WLK': SportsWalking}
     return packages[workout_type](*data)
 
 
